@@ -18,12 +18,12 @@
 
 #define VOLTAGE_SCALE (5.0 / 1023.0)
 
-#define POWER_UP_WAIT_SEC (2)
+#define POWER_UP_WAIT_MS (500)
 
 void setup() {
   Serial.begin(9600); // init serial connection at 9600 baud
   analogWrite(PIN_OUT_THROTTLE, 0); // throttle output to low
-  // delay(POWER_UP_WAIT_SEC * 1000);
+  delay(POWER_UP_WAIT_MS);
 }
 
 float pidUpdate(float setPoint,
