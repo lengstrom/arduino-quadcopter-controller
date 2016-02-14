@@ -24,21 +24,9 @@
 #define CONTROL_MID (CONTROL_HIGH / 2.0) // volts
 #define CONTROL_LOW (0.0) // volts
 
-void setup() {
-  analogWrite(PIN_OUT_ROLL, 0);
-  analogWrite(PIN_OUT_PITCH, 0);
-  analogWrite(PIN_OUT_YAW, 0);
-  analogWrite(PIN_OUT_THROTTLE, 0);
+#define BYTE_MAX (255)
 
-  Serial.begin(9600); // init serial connection at 9600 baud
-
-  delay(POWER_UP_WAIT_MS);
-
-  Serial.println("====");
-  float sensorValue = analogRead(PIN_IN_THROTTLE);
-  Serial.println(sensorValue * VOLTAGE_SCALE);
-  Serial.println("====");
-}
+#define LOOP_STEP (2000) // microseconds
 
 float pidUpdate(float setPoint,
                 float measuredValue,
@@ -102,10 +90,63 @@ void pid() {
   analogWrite(PIN_OUT_THROTTLE, throttleOutput);
 }
 
+void receiveCommands() {
+  // commands are two bytes, of the form XY
+  // X is a single character, 'R', 'P', 'Y', 'T'
+  // for roll, pitch, yaw, throttle
+  // Y is a single byte, 0x00 to 0xff
+  // for roll, pitch, yaw, 0x00 is min, 0x80 is center, 0xff is max
+  // for throttle, 0x00 is min and 0xff is max
+  while (Serial.available() > 1) {
+    byte channel = Serial.read();
+    if (channel != 'R' && channel != 'P' && channel != 'Y' && channel != 'T') {
+      // this shouldn't happen
+      // something weird is going on -- maybe we're out of sync
+      // let's skip this byte and keep going
+      continue;
+    }
+    byte value = Serial.read();
+    switch (channel) {
+      case 'R':
+        rollTarget = CONTROL_HIGH * value / BYTE_MAX;
+        break;
+      case 'P':
+        pitchTarget = CONTROL_HIGH * value / BYTE_MAX;
+        break;
+      case 'Y':
+        yawTarget = CONTROL_HIGH * value / BYTE_MAX;
+        break;
+      case 'T':
+        throttleTarget = CONTROL_HIGH * value / BYTE_MAX;
+        break;
+    }
+  }
+}
+
 void loop() {
-  throttleTarget = (sin(millis() / 100.0) + 1.0) * 1.5;
+  static unsigned long prevLoopTime = 0;
+  unsigned long time = micros();
+  while (time - prevLoopTime < LOOP_STEP && time > prevLoopTime) {
+    time = micros(); // busy wait
+  }
+  prevLoopTime = time;
+
+  receiveCommands();
   pid();
-  delay(2);
+}
+
+void setup() {
+  analogWrite(PIN_OUT_ROLL, 0);
+  analogWrite(PIN_OUT_PITCH, 0);
+  analogWrite(PIN_OUT_YAW, 0);
+  analogWrite(PIN_OUT_THROTTLE, 0);
+
+  Serial.begin(9600); // init serial connection at 9600 baud
+
+  delay(POWER_UP_WAIT_MS);
+
+  Serial.println("====");
   float sensorValue = analogRead(PIN_IN_THROTTLE);
   Serial.println(sensorValue * VOLTAGE_SCALE);
+  Serial.println("====");
 }
