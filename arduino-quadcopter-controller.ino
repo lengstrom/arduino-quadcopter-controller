@@ -28,6 +28,9 @@
 
 #define LOOP_STEP (2000) // microseconds
 
+#define PIN_LED (13)
+#define PIN_CONTROL (2) // ground to enable, high to disable
+
 float pidUpdate(float setPoint,
                 float measuredValue,
                 float *previousError,
@@ -123,6 +126,15 @@ void receiveCommands() {
   }
 }
 
+bool controlEnabled = 0;
+
+void controlOff() {
+  analogWrite(PIN_OUT_ROLL, 0);
+  analogWrite(PIN_OUT_PITCH, 0);
+  analogWrite(PIN_OUT_YAW, 0);
+  analogWrite(PIN_OUT_THROTTLE, 0);
+}
+
 void loop() {
   static unsigned long prevLoopTime = 0;
   unsigned long time = micros();
@@ -132,14 +144,23 @@ void loop() {
   prevLoopTime = time;
 
   receiveCommands();
-  pid();
+  if (digitalRead(PIN_CONTROL) == LOW) {
+    digitalWrite(PIN_LED, HIGH);
+    pid();
+    Serial.println("pid");
+  } else {
+    digitalWrite(PIN_LED, LOW);
+    controlOff();
+    Serial.println("off");
+  }
 }
 
 void setup() {
-  analogWrite(PIN_OUT_ROLL, 0);
-  analogWrite(PIN_OUT_PITCH, 0);
-  analogWrite(PIN_OUT_YAW, 0);
-  analogWrite(PIN_OUT_THROTTLE, 0);
+  // initialize the LED pin as an output:
+  pinMode(PIN_LED, OUTPUT);
+  // initialize the pushbutton pin as an input:
+  pinMode(PIN_CONTROL, INPUT);
+  controlOff();
 
   Serial.begin(9600); // init serial connection at 9600 baud
 
