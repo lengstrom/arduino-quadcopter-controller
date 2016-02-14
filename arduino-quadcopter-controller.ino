@@ -61,9 +61,9 @@ float throttleError = 0;
 float throttleIntegral = 0;
 unsigned long throttleLastSet = 0;
 
-#define Kp (20.0)
+#define Kp (40.0)
 #define Ki (30.0)
-#define Kd (1.0)
+#define Kd (0.3)
 
 void pid() {
   // float roll = analogRead(PIN_IN_ROLL) * VOLTAGE_SCALE;
