@@ -144,9 +144,4 @@ void setup() {
   Serial.begin(9600); // init serial connection at 9600 baud
 
   delay(POWER_UP_WAIT_MS);
-
-  Serial.println("====");
-  float sensorValue = analogRead(PIN_IN_THROTTLE);
-  Serial.println(sensorValue * VOLTAGE_SCALE);
-  Serial.println("====");
 }
