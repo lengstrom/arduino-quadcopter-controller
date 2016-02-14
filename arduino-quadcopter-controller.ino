@@ -20,10 +20,24 @@
 
 #define POWER_UP_WAIT_MS (500)
 
+#define CONTROL_HIGH (3.25) // volts
+#define CONTROL_MID (CONTROL_HIGH / 2.0) // volts
+#define CONTROL_LOW (0.0) // volts
+
 void setup() {
+  analogWrite(PIN_OUT_ROLL, 0);
+  analogWrite(PIN_OUT_PITCH, 0);
+  analogWrite(PIN_OUT_YAW, 0);
+  analogWrite(PIN_OUT_THROTTLE, 0);
+
   Serial.begin(9600); // init serial connection at 9600 baud
-  analogWrite(PIN_OUT_THROTTLE, 0); // throttle output to low
+
   delay(POWER_UP_WAIT_MS);
+
+  Serial.println("====");
+  float sensorValue = analogRead(PIN_IN_THROTTLE);
+  Serial.println(sensorValue * VOLTAGE_SCALE);
+  Serial.println("====");
 }
 
 float pidUpdate(float setPoint,
@@ -41,6 +55,12 @@ float pidUpdate(float setPoint,
   *integral = *integral + error * dt;
   float derivative = (error - *previousError) / dt;
   float output = kp * error + ki * (*integral) + kd * derivative;
+  if (output < 0.0) {
+    output = 0.0;
+  }
+  if (output > 255.0) {
+    output = 255.0;
+  }
   return output;
 }
 
@@ -61,31 +81,31 @@ float throttleError = 0;
 float throttleIntegral = 0;
 unsigned long throttleLastSet = 0;
 
-#define Kp (40.0)
-#define Ki (30.0)
-#define Kd (0.3)
+#define Kp (50.0)
+#define Ki (100.0)
+#define Kd (0.4)
 
 void pid() {
-  // float roll = analogRead(PIN_IN_ROLL) * VOLTAGE_SCALE;
-  // float pitch = analogRead(PIN_IN_PITCH) * VOLTAGE_SCALE;
-  // float yaw = analogRead(PIN_IN_YAW) * VOLTAGE_SCALE;
+  float roll = analogRead(PIN_IN_ROLL) * VOLTAGE_SCALE;
+  float pitch = analogRead(PIN_IN_PITCH) * VOLTAGE_SCALE;
+  float yaw = analogRead(PIN_IN_YAW) * VOLTAGE_SCALE;
   float throttle = analogRead(PIN_IN_THROTTLE) * VOLTAGE_SCALE;
 
-  // float rollOutput = pidUpdate(rollTarget, roll, &rollError, &rollIntegral, &rollLastSet, Kp, Ki, Kd);
-  // float pitchOutput = pidUpdate(pitchTarget, pitch, &pitchError, &pitchIntegral, &pitchLastSet, Kp, Ki, Kd);
-  // float yawOutput = pidUpdate(yawTarget, yaw, &yawError, &yawIntegral, &yawLastSet, Kp, Ki, Kd);
+  float rollOutput = pidUpdate(rollTarget, roll, &rollError, &rollIntegral, &rollLastSet, Kp, Ki, Kd);
+  float pitchOutput = pidUpdate(pitchTarget, pitch, &pitchError, &pitchIntegral, &pitchLastSet, Kp, Ki, Kd);
+  float yawOutput = pidUpdate(yawTarget, yaw, &yawError, &yawIntegral, &yawLastSet, Kp, Ki, Kd);
   float throttleOutput = pidUpdate(throttleTarget, throttle, &throttleError, &throttleIntegral, &throttleLastSet, Kp, Ki, Kd);
 
-  // analogWrite(PIN_OUT_ROLL, rollOutput);
-  // analogWrite(PIN_OUT_PITCH, pitchOutput);
-  // analogWrite(PIN_OUT_YAW, yawOutput);
+  analogWrite(PIN_OUT_ROLL, rollOutput);
+  analogWrite(PIN_OUT_PITCH, pitchOutput);
+  analogWrite(PIN_OUT_YAW, yawOutput);
   analogWrite(PIN_OUT_THROTTLE, throttleOutput);
 }
 
 void loop() {
-  throttleTarget = 1.7;
+  throttleTarget = (sin(millis() / 100.0) + 1.0) * 1.5;
   pid();
-  delay(10);
+  delay(2);
   float sensorValue = analogRead(PIN_IN_THROTTLE);
   Serial.println(sensorValue * VOLTAGE_SCALE);
 }
