@@ -131,7 +131,28 @@ void controlOff() {
   analogWrite(PIN_OUT_PITCH, 0);
   analogWrite(PIN_OUT_YAW, 0);
   analogWrite(PIN_OUT_THROTTLE, 0);
+  controlEnabled = 0;
 }
+
+void controlOn() {
+  if (controlEnabled == 0) {
+    unsigned long now = millis();
+    rollError = 0;
+    rollIntegral = 0;
+    rollLastSet = now;
+    pitchError = 0;
+    pitchIntegral = 0;
+    pitchLastSet = now;
+    yawError = 0;
+    yawIntegral = 0;
+    yawLastSet = now;
+    throttleError = 0;
+    throttleIntegral = 0;
+    throttleLastSet = now;
+  }
+  controlEnabled = 1;
+}
+
 
 void loop() {
   static unsigned long prevLoopTime = 0;
@@ -144,6 +165,7 @@ void loop() {
   receiveCommands();
   if (digitalRead(PIN_CONTROL) == LOW) {
     digitalWrite(PIN_LED, HIGH);
+    controlOn();
     pid();
   } else {
     digitalWrite(PIN_LED, LOW);
