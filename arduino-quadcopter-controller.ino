@@ -145,11 +145,9 @@ void loop() {
   if (digitalRead(PIN_CONTROL) == LOW) {
     digitalWrite(PIN_LED, HIGH);
     pid();
-    Serial.println("pid");
   } else {
     digitalWrite(PIN_LED, LOW);
     controlOff();
-    Serial.println("off");
   }
 }
 
