@@ -18,8 +18,6 @@
 
 #define VOLTAGE_SCALE (5.0 / 1023.0)
 
-#define POWER_UP_WAIT_MS (500)
-
 #define CONTROL_HIGH (3.25) // volts
 #define CONTROL_MID (CONTROL_HIGH / 2.0) // volts
 #define CONTROL_LOW (0.0) // volts
@@ -163,6 +161,4 @@ void setup() {
   controlOff();
 
   Serial.begin(9600); // init serial connection at 9600 baud
-
-  delay(POWER_UP_WAIT_MS);
 }
