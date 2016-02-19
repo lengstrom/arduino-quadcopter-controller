@@ -19,8 +19,8 @@
 #define VOLTAGE_SCALE (5.0 / 1023.0)
 
 #define CONTROL_HIGH (3.25) // volts
-#define CONTROL_MID (CONTROL_HIGH / 2.0) // volts
 #define CONTROL_LOW (0.0) // volts
+#define CONTROL_MID ((CONTROL_HIGH - CONTROL_LOW) / 2.0) // volts
 
 #define BYTE_MAX (255)
 
@@ -53,19 +53,19 @@ float pidUpdate(float setPoint,
   return output;
 }
 
-float rollTarget = 0;
+float rollTarget = CONTROL_MID;
 float rollError = 0;
 float rollIntegral = 0;
 unsigned long rollLastSet = 0;
-float pitchTarget = 0;
+float pitchTarget = CONTROL_MID;
 float pitchError = 0;
 float pitchIntegral = 0;
 unsigned long pitchLastSet = 0;
-float yawTarget = 0;
+float yawTarget = CONTROL_MID;
 float yawError = 0;
 float yawIntegral = 0;
 unsigned long yawLastSet = 0;
-float throttleTarget = 0;
+float throttleTarget = CONTROL_LOW;
 float throttleError = 0;
 float throttleIntegral = 0;
 unsigned long throttleLastSet = 0;
@@ -129,10 +129,10 @@ void receiveCommands() {
 bool controlEnabled = 0;
 
 void controlOff() {
-  analogWrite(PIN_OUT_ROLL, 0);
-  analogWrite(PIN_OUT_PITCH, 0);
-  analogWrite(PIN_OUT_YAW, 0);
-  analogWrite(PIN_OUT_THROTTLE, 0);
+  analogWrite(PIN_OUT_ROLL, CONTROL_MID);
+  analogWrite(PIN_OUT_PITCH, CONTROL_MID);
+  analogWrite(PIN_OUT_YAW, CONTROL_MID);
+  analogWrite(PIN_OUT_THROTTLE, CONTROL_LOW);
   controlEnabled = 0;
 }
 
