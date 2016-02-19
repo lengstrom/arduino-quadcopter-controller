@@ -25,15 +25,15 @@ void gamepadAction(void* inContext, IOReturn inResult, void* inSender, IOHIDValu
     int max = IOHIDElementGetLogicalMax(element);
     IOHIDElementCookie input = IOHIDElementGetCookie(element);
     if (input == COOKIE_THROTTLE) {
-        NSLog(@"THROTTLE = %d", elementValue);
+        printf("T%d\n", elementValue);
     } else if (input == COOKIE_ROLL) {
-        NSLog(@"ROLL = %d", elementValue);
+        printf("R%d\n", elementValue);
     } else if (input == COOKIE_PITCH) {
-        NSLog(@"PITCH = %d", elementValue);
+        printf("P%d\n", elementValue);
     } else if (input == COOKIE_YAW) {
-        NSLog(@"YAW = %d", elementValue);
+        printf("Y%d\n", elementValue);
     }
-    // TODO
+    fflush(stdout);
 }
 
 void setupGamepad()
