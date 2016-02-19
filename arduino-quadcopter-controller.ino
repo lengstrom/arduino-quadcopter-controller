@@ -109,10 +109,12 @@ void receiveCommands() {
     byte value = Serial.read();
     switch (channel) {
       case 'R':
-        rollTarget = CONTROL_HIGH * value / BYTE_MAX;
+        // roll control is inverted
+        rollTarget = CONTROL_HIGH * (BYTE_MAX - value) / BYTE_MAX;
         break;
       case 'P':
-        pitchTarget = CONTROL_HIGH * value / BYTE_MAX;
+        // pitch control is inverted
+        pitchTarget = CONTROL_HIGH * (BYTE_MAX - value) / BYTE_MAX;
         break;
       case 'Y':
         yawTarget = CONTROL_HIGH * value / BYTE_MAX;
