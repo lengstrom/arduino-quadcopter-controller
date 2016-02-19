@@ -8,7 +8,6 @@ import sys
 # writes to arduino
 
 def main():
-    print sys.argv[1]
     ser = serial.Serial(sys.argv[1])
     while True:
         cmd = raw_input()
