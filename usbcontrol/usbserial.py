@@ -15,6 +15,7 @@ def main():
         # value is -127..127
         value_ = value + 127 # adjust to 0..254
         out = '%s%s' % (axis, chr(value_))
+        print '%s -> %d' % (axis, value_)
         ser.write(out)
 
 if __name__ == '__main__':
